@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+*.db
+.pytest_cache/
+.idea/
+.vscode/
+
+backend/app/static/index_backup.html

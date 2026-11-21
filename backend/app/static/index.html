@@ -1,0 +1,1346 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaimGraph | Claim Investigation</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            background: #f4f6fb;
+            color: #172033;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 750;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
+            color: #8b9cff;
+        }
+
+        .header-tag {
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        main {
+            width: min(1100px, 90%);
+            margin: 45px auto;
+        }
+
+        .intro {
+            margin-bottom: 28px;
+        }
+
+        .intro h1 {
+            font-size: clamp(27px, 4vw, 36px);
+            margin-bottom: 10px;
+        }
+
+        .intro p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .workspace,
+        .result-card,
+        .evidence-card {
+            background: white;
+            border: 1px solid #e3e8f1;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+        }
+
+        .workspace {
+            padding: 25px;
+            border-radius: 16px;
+        }
+
+        .section-heading {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 13px;
+        }
+
+        textarea,
+        input {
+            width: 100%;
+            border: 1px solid #d7deeb;
+            border-radius: 11px;
+            padding: 14px;
+            font: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 175px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        textarea:focus,
+        input:focus {
+            border-color: #687cf0;
+            box-shadow: 0 0 0 3px #687cf01c;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 17px;
+            flex-wrap: wrap;
+        }
+
+        .hint {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 9px;
+            background: #4f5fe8;
+            color: white;
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3d4ed1;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: .6;
+        }
+
+        button.secondary {
+            background: #e9edff;
+            color: #3949bd;
+        }
+
+        button.secondary:hover {
+            background: #dce2ff;
+        }
+
+        button.dark {
+            background: #263449;
+        }
+
+        button.dark:hover {
+            background: #172033;
+        }
+
+        #status {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        #results {
+            margin-top: 35px;
+        }
+
+        .results-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .results-heading h2 {
+            font-size: 22px;
+        }
+
+        .result-card {
+            padding: 19px;
+            margin-bottom: 15px;
+            box-shadow: none;
+        }
+
+        .claim-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .claim-number {
+            font-weight: 750;
+            color: #4f5fe8;
+            font-size: 13px;
+        }
+
+        .candidate,
+        .pill {
+            display: inline-block;
+            background: #eef0ff;
+            color: #4f5fe8;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .claim-text {
+            line-height: 1.65;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .entity-heading {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 700;
+            margin-top: 17px;
+            margin-bottom: 9px;
+        }
+
+        .entity-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .entity {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .claim-tools {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #edf0f5;
+        }
+
+        .claim-tools h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 9px;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .tool-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tool-status {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 9px;
+        }
+
+        .evidence-list {
+            margin-top: 13px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .evidence-card {
+            padding: 14px;
+            border-radius: 10px;
+            box-shadow: none;
+            background: #fbfcff;
+        }
+
+        .evidence-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .evidence-title a {
+            color: #3949bd;
+            text-decoration: none;
+        }
+
+        .evidence-title a:hover {
+            text-decoration: underline;
+        }
+
+        .evidence-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin: 8px 0;
+        }
+
+        .pill.neutral {
+            background: #eef2f7;
+            color: #475569;
+        }
+
+        .pill.supporting {
+            background: #e7f8ee;
+            color: #167344;
+        }
+
+        .pill.contradicting {
+            background: #fff0ed;
+            color: #b33b2e;
+        }
+
+        .pill.insufficient {
+            background: #fff6df;
+            color: #946200;
+        }
+
+        .evidence-snippet {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .history-panel {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #8794f5;
+            background: #f8f9ff;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .history-item {
+            padding: 7px 0;
+            border-bottom: 1px solid #e8ebf5;
+        }
+
+        .history-item:last-child {
+            border-bottom: 0;
+        }
+
+        .empty {
+            background: white;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 22px;
+            color: #64748b;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .notice {
+            margin-top: 22px;
+            padding: 13px 15px;
+            border-radius: 9px;
+            background: #fff8e8;
+            color: #805b16;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        @media (max-width: 650px) {
+            header {
+                padding: 18px 5%;
+            }
+
+            main {
+                margin-top: 30px;
+            }
+
+            .workspace {
+                padding: 17px;
+            }
+
+            .header-tag {
+                display: none;
+            }
+
+            .search-row {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .search-row button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">Claim<span>Graph</span></div>
+        <div class="header-tag">
+            Evidence-based claim investigation
+        </div>
+    </header>
+
+    <main>
+
+        <section class="intro">
+            <h1>Investigate information, one claim at a time.</h1>
+
+            <p>
+                Submit a text passage to extract candidate claims and
+                identify named entities through our NLP pipeline.
+            </p>
+        </section>
+
+        <section class="workspace">
+
+            <div class="section-heading">
+                Enter text for analysis
+            </div>
+
+            <textarea
+                id="claimInput"
+                maxlength="10000"
+                placeholder="Paste a news passage or information you want to analyze..."
+            >India launched a new AI policy in 2026. The Ministry of Education will train 10 million students. The programme starts in January 2027.</textarea>
+
+            <div class="actions">
+                <span class="hint">Maximum 10,000 characters</span>
+
+                <button
+                    id="analyzeButton"
+                    onclick="analyzeText()"
+                >
+                    Analyze Text →
+                </button>
+            </div>
+
+            <div id="status" role="status" aria-live="polite">
+                Ready to analyze your text.
+            </div>
+
+        </section>
+
+        <section id="results" hidden>
+
+            <div class="results-heading">
+                <h2>Analysis Results</h2>
+                <span class="hint" id="investigationId"></span>
+            </div>
+
+            <div id="claimResults"></div>
+
+        </section>
+
+        <div class="notice">
+            <strong>Analysis note:</strong>
+            ClaimGraph extracts candidate claims and entities using
+            rule-based methods. Evidence analysis uses preliminary
+            text similarity and keyword signals; it does not
+            independently establish whether a claim is true or false.
+            Always review the original sources.
+        </div>
+
+    </main>
+
+    <footer>
+        ClaimGraph · Evidence-based investigation
+    </footer>
+
+    <script>
+
+        async function apiRequest(url, options = {}) {
+
+            const response = await fetch(url, options);
+
+            let data = {};
+
+            try {
+                data = await response.json();
+            } catch {
+                throw new Error(
+                    "The server returned an invalid response."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detail || "Something went wrong with the API."
+                );
+            }
+
+            return data;
+        }
+
+
+        function getClaimId(claim) {
+    const rawId =
+        claim.id ??
+        claim.database_id ??
+        claim.claimId ??
+        claim.claim_id;
+
+    const numericId = Number(rawId);
+
+    return Number.isInteger(numericId) && numericId > 0
+        ? numericId
+        : null;
+}
+
+
+        async function analyzeText() {
+
+            const input =
+                document.getElementById("claimInput").value.trim();
+
+            const button =
+                document.getElementById("analyzeButton");
+
+            const status =
+                document.getElementById("status");
+
+            const results =
+                document.getElementById("results");
+
+
+            if (!input) {
+                status.textContent =
+                    "Please enter some text first.";
+                return;
+            }
+
+
+            button.disabled = true;
+            button.textContent = "Analyzing...";
+            results.hidden = true;
+
+            status.textContent = "Creating investigation...";
+
+
+            try {
+
+                const created = await apiRequest(
+                    "/api/v1/investigations",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            input_type: "text",
+                            content: input
+                        })
+                    }
+                );
+
+
+                const investigationId =
+                    created.investigation_id ||
+                    created.id ||
+                    created.investigation?.id;
+
+
+                if (!investigationId) {
+                    throw new Error(
+                        "Investigation was created, but its ID was not found in the API response."
+                    );
+                }
+
+
+                status.textContent =
+                    "Extracting claims and entities...";
+
+
+                await apiRequest(
+                    `/api/v1/investigations/${encodeURIComponent(investigationId)}/analyze`,
+                    { method: "POST" }
+                );
+
+
+                status.textContent = "Loading saved results...";
+
+
+                const saved = await apiRequest(
+                    `/api/v1/investigations/${encodeURIComponent(investigationId)}/claims`
+                );
+
+
+                const claims =
+                    saved.claims ||
+                    saved.analysis?.claims ||
+                    [];
+
+
+                renderClaims(claims);
+
+
+                document.getElementById("investigationId").textContent =
+                    "ID: " + investigationId;
+
+
+                results.hidden = false;
+
+                status.textContent =
+                    `Analysis completed. ${claims.length} candidate claim(s) found.`;
+
+
+            } catch (error) {
+
+                status.textContent =
+                    "Error: " + error.message;
+
+            } finally {
+
+                button.disabled = false;
+                button.textContent = "Analyze Text →";
+
+            }
+        }
+
+
+        function renderClaims(claims) {
+
+            const container =
+                document.getElementById("claimResults");
+
+            container.replaceChildren();
+
+
+            if (!claims.length) {
+
+                container.innerHTML =
+                    '<div class="empty">No candidate claims were found.</div>';
+
+                return;
+            }
+
+
+            claims.forEach((claim, index) => {
+
+                const card = document.createElement("article");
+                card.className = "result-card";
+
+
+                const top = document.createElement("div");
+                top.className = "claim-top";
+
+
+                const number = document.createElement("span");
+                number.className = "claim-number";
+
+                number.textContent =
+                    `CLAIM ${String(index + 1).padStart(3, "0")}`;
+
+
+                const badge = document.createElement("span");
+                badge.className = "candidate";
+                badge.textContent = "CANDIDATE";
+
+                top.append(number, badge);
+
+
+                const claimText = document.createElement("p");
+                claimText.className = "claim-text";
+
+                claimText.textContent =
+                    claim.claim_text ||
+                    claim.text ||
+                    "Claim text unavailable";
+
+
+                const entityHeading = document.createElement("div");
+                entityHeading.className = "entity-heading";
+                entityHeading.textContent = "DETECTED ENTITIES";
+
+
+                const entityList = document.createElement("div");
+                entityList.className = "entity-list";
+
+
+                (claim.entities || []).forEach(entity => {
+
+                    const tag = document.createElement("span");
+                    tag.className = "entity";
+
+                    const entityName =
+                        entity.entity_text ||
+                        entity.text ||
+                        "Entity";
+
+                    const entityType =
+                        entity.label ||
+                        entity.entity_type ||
+                        "ENTITY";
+
+                    tag.textContent =
+                        `${entityName} · ${entityType}`;
+
+                    entityList.appendChild(tag);
+
+                });
+
+
+                if (!claim.entities || claim.entities.length === 0) {
+
+                    const empty = document.createElement("span");
+                    empty.className = "hint";
+                    empty.textContent = "No entities detected.";
+
+                    entityList.appendChild(empty);
+                }
+
+
+                card.append(
+                    top,
+                    claimText,
+                    entityHeading,
+                    entityList
+                );
+
+
+                // EVIDENCE INVESTIGATION SECTION
+
+                const tools = document.createElement("section");
+                tools.className = "claim-tools";
+
+
+                const heading = document.createElement("h3");
+                heading.textContent = "Evidence investigation";
+
+                tools.appendChild(heading);
+
+
+                const claimId = getClaimId(claim);
+
+
+                if (claimId === null) {
+
+                    const warning = document.createElement("p");
+
+                    warning.className = "tool-status";
+
+                    warning.textContent =
+                        "Claim ID is missing from the API response; evidence actions cannot be run for this claim.";
+
+                    tools.appendChild(warning);
+
+                } else {
+
+                    const searchRow = document.createElement("div");
+                    searchRow.className = "search-row";
+
+
+                    const queryInput = document.createElement("input");
+
+                    queryInput.type = "text";
+
+                    queryInput.value =
+                        claim.claim_text || claim.text || "";
+
+                    queryInput.placeholder =
+                        "Search query for evidence";
+
+                    queryInput.setAttribute(
+                        "aria-label",
+                        "Evidence search query"
+                    );
+
+
+                    const evidenceList =
+                        document.createElement("div");
+
+                    evidenceList.className = "evidence-list";
+
+
+                    const collectButton =
+                        document.createElement("button");
+
+                    collectButton.textContent =
+                        "Collect Evidence";
+
+                    collectButton.onclick = () =>
+                        collectEvidence(
+                            claimId,
+                            queryInput.value,
+                            tools,
+                            evidenceList
+                        );
+
+
+                    searchRow.append(
+                        queryInput,
+                        collectButton
+                    );
+
+
+                    const toolActions =
+                        document.createElement("div");
+
+                    toolActions.className = "tool-actions";
+
+
+                    const loadButton =
+                        document.createElement("button");
+
+                    loadButton.className = "secondary";
+
+                    loadButton.textContent =
+                        "Load Saved Evidence";
+
+                    loadButton.onclick = () =>
+                        loadEvidence(
+                            claimId,
+                            tools,
+                            evidenceList
+                        );
+
+
+                    const analyzeButton =
+                        document.createElement("button");
+
+                    analyzeButton.className = "dark";
+
+                    analyzeButton.textContent =
+                        "Analyze Evidence";
+
+                    analyzeButton.onclick = () =>
+                        analyzeClaimEvidence(
+                            claimId,
+                            tools,
+                            evidenceList
+                        );
+
+
+                    toolActions.append(
+                        loadButton,
+                        analyzeButton
+                    );
+
+
+                    const toolStatus =
+                        document.createElement("div");
+
+                    toolStatus.className = "tool-status";
+
+                    toolStatus.textContent =
+                        "Collect sources for this claim, then run preliminary evidence analysis.";
+
+
+                    tools.append(
+                        searchRow,
+                        toolActions,
+                        toolStatus,
+                        evidenceList
+                    );
+
+
+                    // Load previously saved evidence automatically.
+                    loadEvidence(
+                        claimId,
+                        tools,
+                        evidenceList,
+                        true
+                    );
+                }
+
+
+                card.appendChild(tools);
+                container.appendChild(card);
+
+            });
+        }
+
+
+        function setToolStatus(tools, message) {
+
+            const status =
+                tools.querySelector(".tool-status");
+
+            if (status) {
+                status.textContent = message;
+            }
+        }
+
+
+        // COLLECT EVIDENCE
+
+        async function collectEvidence(
+            claimId,
+            query,
+            tools,
+            list
+        ) {
+
+            if (!query.trim()) {
+
+                setToolStatus(
+                    tools,
+                    "Enter a search query first."
+                );
+
+                return;
+            }
+
+
+            setToolStatus(
+                tools,
+                "Searching for evidence sources..."
+            );
+
+
+            try {
+
+                const url =
+                    `/api/v1/claims/${encodeURIComponent(claimId)}/collect-evidence?query=${encodeURIComponent(query.trim())}&max_results=5`;
+
+
+                const data = await apiRequest(
+                    url,
+                    { method: "POST" }
+                );
+
+
+                const items =
+                    Array.isArray(data)
+                        ? data
+                        : (data.evidence || data.results || []);
+
+
+                setToolStatus(
+                    tools,
+                    `Evidence collection request completed. ${items.length} source(s) returned.`
+                );
+
+
+                await loadEvidence(
+                    claimId,
+                    tools,
+                    list,
+                    true
+                );
+
+
+         } catch (error) {
+
+    console.error("Evidence Collection Error:", error);
+
+    let errorDetails = error?.message || "Unknown error";
+
+    if (error?.response?.data) {
+        errorDetails = error.response.data;
+    } else if (error?.detail) {
+        errorDetails = error.detail;
+    }
+
+    if (typeof errorDetails === "object") {
+        errorDetails = JSON.stringify(errorDetails, null, 2);
+    }
+
+    setToolStatus(
+        tools,
+        "Evidence collection error: " + errorDetails
+    );
+
+}
+        }
+
+
+        // LOAD SAVED EVIDENCE
+
+        async function loadEvidence(
+            claimId,
+            tools,
+            list,
+            quiet = false
+        ) {
+
+            if (!quiet) {
+                setToolStatus(
+                    tools,
+                    "Loading saved evidence..."
+                );
+            }
+
+
+            try {
+
+                const data = await apiRequest(
+                    `/api/v1/claims/${encodeURIComponent(claimId)}/evidence`
+                );
+
+
+                const evidence =
+                    Array.isArray(data)
+                        ? data
+                        : (data.evidence || []);
+
+
+                renderEvidence(evidence, list);
+
+
+                if (!quiet) {
+
+                    setToolStatus(
+                        tools,
+                        `${evidence.length} saved evidence record(s) loaded.`
+                    );
+                }
+
+
+            } catch (error) {
+
+                if (!quiet) {
+
+                    setToolStatus(
+                        tools,
+                        "Could not load evidence: " + error.message
+                    );
+                }
+
+            }
+        }
+
+
+        // ANALYZE EVIDENCE
+
+        async function analyzeClaimEvidence(
+            claimId,
+            tools,
+            list
+        ) {
+
+            setToolStatus(
+                tools,
+                "Analyzing saved evidence..."
+            );
+
+
+            try {
+
+                const data = await apiRequest(
+                    `/api/v1/claims/${encodeURIComponent(claimId)}/analyze-evidence`,
+                    { method: "POST" }
+                );
+
+
+                const count =
+                    data.total_evidence ??
+                    data.total_analyzed ??
+                    data.results?.length ??
+                    data.analysis?.length;
+
+
+                setToolStatus(
+                    tools,
+                    `Evidence analysis completed${count !== undefined ? ` for ${count} record(s)` : ""}. Refreshing evidence and analysis details...`
+                );
+
+
+                await loadEvidence(
+                    claimId,
+                    tools,
+                    list,
+                    true
+                );
+
+
+                await loadHistoryForList(list);
+
+
+            } catch (error) {
+
+                setToolStatus(
+                    tools,
+                    "Evidence analysis error: " + error.message
+                );
+
+            }
+        }
+
+
+        function assessmentClass(value) {
+
+            const normalized =
+                String(value || "unclassified").toLowerCase();
+
+
+            if (normalized.includes("support")) {
+                return "supporting";
+            }
+
+            if (normalized.includes("contradict")) {
+                return "contradicting";
+            }
+
+            if (normalized.includes("insufficient")) {
+                return "insufficient";
+            }
+
+            return "neutral";
+        }
+
+
+        // DISPLAY EVIDENCE
+
+        function renderEvidence(evidence, list) {
+
+            list.replaceChildren();
+
+
+            if (!evidence.length) {
+
+                const empty = document.createElement("div");
+
+                empty.className = "empty";
+
+                empty.textContent =
+                    "No saved evidence found for this claim yet. Use Collect Evidence to search for sources.";
+
+                list.appendChild(empty);
+
+                return;
+            }
+
+
+            evidence.forEach(item => {
+
+                const card = document.createElement("article");
+
+                card.className = "evidence-card";
+
+                card.dataset.evidenceId = item.id;
+
+
+                const title = document.createElement("div");
+
+                title.className = "evidence-title";
+
+
+                const link = document.createElement("a");
+
+                link.href = item.source_url || "#";
+
+                link.target = "_blank";
+
+                link.rel = "noopener noreferrer";
+
+                link.textContent =
+                    item.source_title ||
+                    item.source_domain ||
+                    "Evidence source";
+
+                title.appendChild(link);
+
+
+                const meta = document.createElement("div");
+
+                meta.className = "evidence-meta";
+
+
+                const type = document.createElement("span");
+
+                type.className =
+                    `pill ${assessmentClass(item.evidence_type)}`;
+
+                type.textContent =
+                    item.evidence_type || "unclassified";
+
+                meta.appendChild(type);
+
+
+                if (item.source_domain) {
+
+                    const domain = document.createElement("span");
+
+                    domain.className = "pill neutral";
+
+                    domain.textContent = item.source_domain;
+
+                    meta.appendChild(domain);
+                }
+
+
+                const snippet = document.createElement("p");
+
+                snippet.className = "evidence-snippet";
+
+                snippet.textContent =
+                    item.snippet || "No source excerpt available.";
+
+
+                const historyButton =
+                    document.createElement("button");
+
+                historyButton.className = "secondary";
+
+                historyButton.style.marginTop = "10px";
+
+                historyButton.textContent =
+                    "View Analysis History";
+
+                historyButton.onclick = () =>
+                    loadEvidenceHistory(item.id, card);
+
+
+                card.append(
+                    title,
+                    meta,
+                    snippet,
+                    historyButton
+                );
+
+                list.appendChild(card);
+
+            });
+        }
+
+
+        // ANALYSIS HISTORY
+
+        async function loadEvidenceHistory(
+            evidenceId,
+            card
+        ) {
+
+            let panel =
+                card.querySelector(".history-panel");
+
+
+            if (!panel) {
+
+                panel = document.createElement("div");
+
+                panel.className = "history-panel";
+
+                card.appendChild(panel);
+            }
+
+
+            panel.textContent =
+                "Loading analysis history...";
+
+
+            try {
+
+                const data = await apiRequest(
+                    `/api/v1/evidence/${encodeURIComponent(evidenceId)}/analysis-history`
+                );
+
+
+                panel.replaceChildren();
+
+
+                const heading =
+                    document.createElement("strong");
+
+                heading.textContent =
+                    `Analysis history · ${data.total_analyses ?? (data.history || []).length} run(s)`;
+
+                panel.appendChild(heading);
+
+
+                const history = data.history || [];
+
+
+                if (!history.length) {
+
+                    const empty = document.createElement("p");
+
+                    empty.textContent =
+                        "No analysis history is available for this evidence.";
+
+                    panel.appendChild(empty);
+
+                    return;
+                }
+
+
+                history.forEach(record => {
+
+                    const row =
+                        document.createElement("div");
+
+                    row.className = "history-item";
+
+                    row.textContent =
+                        `Run #${record.analysis_id} · ${record.assessment} · Similarity: ${record.similarity_score} · Confidence: ${record.confidence} · ${record.reason} · ${record.analyzed_at}`;
+
+                    panel.appendChild(row);
+
+                });
+
+
+            } catch (error) {
+
+                panel.textContent =
+                    "Could not load analysis history: " + error.message;
+
+            }
+        }
+
+
+        async function loadHistoryForList(list) {
+
+            const cards =
+                list.querySelectorAll(".evidence-card");
+
+
+            for (const card of cards) {
+
+                const evidenceId =
+                    card.dataset.evidenceId;
+
+                if (evidenceId) {
+
+                    await loadEvidenceHistory(
+                        evidenceId,
+                        card
+                    );
+                }
+            }
+        }
+
+    </script>
+
+</body>
+</html>
